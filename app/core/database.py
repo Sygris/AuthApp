@@ -13,7 +13,7 @@ if not DATABASE_URL:
 
 engine = create_engine(DATABASE_URL, echo=True)  # echo used for debug
 
-SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+SessionLocal = sessionmaker(autoflush=False, expire_on_commit=False, bind=engine)
 
 
 class Base(DeclarativeBase):
