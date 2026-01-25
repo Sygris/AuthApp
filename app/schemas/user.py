@@ -11,3 +11,8 @@ class UserRead(BaseModel):
     id: int
     email: EmailStr
     nickname: str | None = None
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
