@@ -8,6 +8,7 @@ from app.routers.auth import authRouter
 async def lifespan(app: FastAPI):
     print("Initialising the database...")
     create_tables()
+    print("Database has been initialised")
     yield
     print("Closing application")
 
