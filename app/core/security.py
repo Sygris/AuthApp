@@ -1,13 +1,13 @@
 import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
+from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.models.user import UserDB
 from jose import JWTError, jwt
+from app.models.user import UserDB
+from app.core.database import get_db
 
 load_dotenv()
 
@@ -31,7 +31,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 def create_access_token(user_id: int) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     payload = {"sub": str(user_id), "exp": expire}
 
@@ -40,12 +40,16 @@ def create_access_token(user_id: int) -> str:
 
 
 def decode_access_token(token: str) -> str:
+    print("DECODING")
     try:
         payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
         user_id = payload.get("sub")
 
         if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid token")
+
+        print("JWT exp:", datetime.fromtimestamp(payload["exp"], tz=timezone.utc))
+        print("Server now:", datetime.now(timezone.utc))
 
         return user_id
     except JWTError:
