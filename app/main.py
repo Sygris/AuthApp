@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from contextlib import asynccontextmanager
+from app.core.security import get_current_user
 from app.utils.init_db import create_tables
 from app.routers.auth import authRouter
+from app.models.user import UserDB
 
 
 @asynccontextmanager
@@ -22,3 +24,8 @@ app.include_router(authRouter)
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/profile")
+def profile(current_user: UserDB = Depends(get_current_user)):
+    return current_user
