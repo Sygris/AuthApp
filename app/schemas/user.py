@@ -7,7 +7,7 @@ class UserCreate(BaseModel):
     nickname: str | None = None
 
 
-class UserRead(BaseModel):
+class UserPublic(BaseModel):
     id: int
     email: EmailStr
     nickname: str | None = None
@@ -18,6 +18,7 @@ class UserLogin(BaseModel):
     password: str
 
 
-class UserToken(BaseModel):
+class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
