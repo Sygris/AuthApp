@@ -1,4 +1,5 @@
 import os
+import secrets
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
@@ -54,6 +55,10 @@ def decode_access_token(token: str) -> str:
         return user_id
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+def create_refresh_token():
+    return secrets.token_urlsafe(64)  # 64 bytes
 
 
 def get_current_user(
