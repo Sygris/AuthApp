@@ -93,6 +93,10 @@ def refresh_token(data: RefreshRequest, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid Refresh Token")
 
-    new_access_token = create_access_token({"sub": user.id, "role": user.role})
+    type(user.id)
+
+    new_access_token = create_access_token(
+        {"sub": str(user.id), "role": user.role.value}
+    )
 
     return {"access_token": new_access_token, "token_type": "bearer"}
