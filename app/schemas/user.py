@@ -1,10 +1,13 @@
 from pydantic import BaseModel, EmailStr
 
+from app.models.user import Role
+
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
     nickname: str | None = None
+    role: Role | None = None
 
 
 class UserPublic(BaseModel):

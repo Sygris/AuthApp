@@ -31,10 +31,11 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def create_access_token(user_id: int) -> str:
+def create_access_token(data: dict) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    payload = {"sub": str(user_id), "exp": expire}
+    payload = data.copy()
+    payload["exp"] = expire
 
     token = jwt.encode(payload, SECRET_KEY, ALGORITHM)
     return token

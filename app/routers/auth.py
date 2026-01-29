@@ -59,7 +59,9 @@ def login(loginData: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     # Creates access token (short lived) and refresh token (long lived/stored in db)
-    access_token = create_access_token(existing_user.id)
+    access_token = create_access_token(
+        {"sub": existing_user.id, "role": existing_user.role}
+    )
     refresh_token = create_refresh_token()
 
     # Saves it in the db
@@ -91,6 +93,6 @@ def refresh_token(data: RefreshRequest, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid Refresh Token")
 
-    new_access_token = create_access_token(user.id)
+    new_access_token = create_access_token({"sub": user.id, "role": user.role})
 
     return {"access_token": new_access_token, "token_type": "bearer"}
