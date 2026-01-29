@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
-from app.models.user import UserDB
+from app.models.user import Role as UserRole, UserDB
 from app.core.database import get_db
 
 load_dotenv()
@@ -37,23 +37,16 @@ def create_access_token(data: dict) -> str:
     payload = data.copy()
     payload["exp"] = expire
 
-    token = jwt.encode(payload, SECRET_KEY, ALGORITHM)
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return token
 
 
-def decode_access_token(token: str) -> str:
-    print("DECODING")
+def get_token_data(token: str = Depends(oauth2_scheme)) -> dict:
+    print(token)
     try:
-        payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
-        user_id = payload.get("sub")
-
-        if user_id is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-
-        print("JWT exp:", datetime.fromtimestamp(payload["exp"], tz=timezone.utc))
-        print("Server now:", datetime.now(timezone.utc))
-
-        return user_id
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(payload)
+        return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
@@ -63,12 +56,27 @@ def create_refresh_token():
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token_data: dict = Depends(get_token_data), db: Session = Depends(get_db)
 ) -> UserDB:
-    user_id = decode_access_token(token)
+    user_id = token_data.get("sub")
 
-    if not user_id:
+    if user_id is None:
         raise HTTPException(status_code=401, detail="User not found")
 
-    user = db.get(UserDB, int(user_id))
+    user = db.get(UserDB, user_id)
+
+    if not user:
+        raise HTTPException(status_code=401)
+
     return user
+
+
+def require_role(required_role: UserRole):
+    def dependency(current_user: UserDB = Depends(get_current_user)) -> UserDB:
+        print(current_user)
+        if current_user.role != required_role:
+            raise HTTPException(status_code=403, detail="Insufficient Permissions")
+
+        return current_user
+
+    return dependency

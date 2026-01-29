@@ -60,7 +60,7 @@ def login(loginData: UserLogin, db: Session = Depends(get_db)):
 
     # Creates access token (short lived) and refresh token (long lived/stored in db)
     access_token = create_access_token(
-        {"sub": existing_user.id, "role": existing_user.role}
+        {"sub": str(existing_user.id), "role": existing_user.role.value}
     )
     refresh_token = create_refresh_token()
 
